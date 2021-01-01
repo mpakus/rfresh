@@ -70,8 +70,20 @@ def add_template_repository_to_source_path
   end
 end
 
+def get_file(src, dst = nil)
+  if __FILE__ =~ %r{\Ahttps?://}
+    url = 'https://raw.githubusercontent.com/mpakus/rfresh/main/'
+  else
+    url = './'
+  end
+
+  dst = src if dst.nil?
+
+  get(url + src, dst, force: true)
+end
+
 def apply_template!
-  add_template_repository_to_source_path
+  # add_template_repository_to_source_path
 
   gem 'slim-rails'
 
@@ -107,15 +119,15 @@ def apply_template!
   environment 'Slim::Engine.set_options pretty: true, sort_attrs: false',
               env: 'development'
 
-  copy_file '.rubocop.yml'
-  copy_file 'Procfile.dev'
-  copy_file 'auto_annotate_models.rake', 'lib/tasks/auto_annotate_models.rake'
-  copy_file 'workflow.yml', '.github/workflows/workflow.yml'
+  get_file '.rubocop.yml'
+  get_file 'Procfile.dev'
+  get_file 'auto_annotate_models.rake', 'lib/tasks/auto_annotate_models.rake'
+  get_file 'workflow.yml', '.github/workflows/workflow.yml'
 
   after_bundle do
     generate 'rspec:install'
-    copy_file 'rails_helper.rb', 'spec/rails_helper.rb', force: true
-    copy_file '.rspec', force: true
+    get_file 'rails_helper.rb', 'spec/rails_helper.rb', force: true
+    get_file '.rspec', force: true
   end
 end
 
